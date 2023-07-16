@@ -1,5 +1,6 @@
 pub trait MatrixElem {
     fn add(self, rhs: Self) -> Self;
+    fn sub(self, rhs: Self) -> Self;
     fn mul(self, rhs: Self) -> Self;
     fn to_f64(self) -> f64;
 }
@@ -19,6 +20,21 @@ impl MatrixElem for String {
         format!("{}+{}", self, rhs)
     }
 
+    // A bit overengineered but fun
+    fn sub(self, rhs: Self) -> Self {
+        let s = "+".to_owned() + &rhs;
+        match self.find(&s) {
+            Some(_) => self.replacen(&s, "", 1),
+            None => {
+                let s = rhs.clone() + "+";
+                match self.find(&s) {
+                    Some(_) => self.replacen(&s, "", 1),
+                    None => return format!("{}-{}", self, rhs)
+                }
+            }
+        }
+    }
+
     fn mul(self, rhs: Self) -> Self {
         format!("{}{}", self, rhs)
     }
@@ -32,10 +48,14 @@ impl MatrixElem for String {
 /// Numericals
 ///
 macro_rules! impl_matrix_traits {
-    ($type:ty, $zero:expr, $one:expr) => {
+    ($zero:expr, $one:expr, $($type:ty),* $(,)*) => {$(
         impl MatrixElem for $type {
             fn add(self, rhs: Self) -> Self {
                 self + rhs
+            }
+
+            fn sub(self, rhs: Self) -> Self {
+                self - rhs
             }
 
             fn mul(self, rhs: Self) -> Self {
@@ -64,20 +84,8 @@ macro_rules! impl_matrix_traits {
                 &$one == self
             }
         }
-    };
+    )*};
 }
 
-impl_matrix_traits!(u8, 0, 1);
-impl_matrix_traits!(u16, 0, 1);
-impl_matrix_traits!(u32, 0, 1);
-impl_matrix_traits!(u64, 0, 1);
-impl_matrix_traits!(usize, 0, 1);
-
-impl_matrix_traits!(i8, 0, 1);
-impl_matrix_traits!(i16, 0, 1);
-impl_matrix_traits!(i32, 0, 1);
-impl_matrix_traits!(i64, 0, 1);
-impl_matrix_traits!(isize, 0, 1);
-
-impl_matrix_traits!(f32, 0.0, 1.0);
-impl_matrix_traits!(f64, 0.0, 1.0);
+impl_matrix_traits!(0, 1, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+impl_matrix_traits!(0., 1., f32, f64);
