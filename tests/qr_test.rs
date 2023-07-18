@@ -1,16 +1,5 @@
 use mm::{qr_factorization::*, matrix::*};
-
-fn fix_zeroes(a: &mut Matrix<f64>)
-{
-    let eps = 0.0000001f64;
-    for row in 0..a.height() {
-        for col in 0..a.width() {
-            if a.get(row,col).abs() < eps {
-                a.set(row, col, 0.);
-            }
-        }
-    }
-}
+mod common;
 
 #[test]
 fn householder_test() {
@@ -68,7 +57,7 @@ fn qr_test_r() {
          [-1.,-1.,5.],
          [1.,3.,7.]]);
     
-    let mut result = qr(&a);
+    let result = qr(&a);
 
     let r = Matrix::from(
         [[2.,4.,2.],
@@ -76,8 +65,7 @@ fn qr_test_r() {
          [0.,0.,-4.],
          [0.,0.,0.]]);
 
-    fix_zeroes(&mut result.r);
-    assert_eq!(format!("{:.2}", result.r), format!("{:.2}", r));
+    assert_eq!(format!("{:.2}", common::fix_zeroes(result.r)), format!("{:.2}", r));
 }
 
 #[test]
@@ -99,9 +87,8 @@ fn qr_test_tall_matrix()
     let a = Matrix::from([[1.,4.,8.]]).transpose();
     let r = Matrix::from([[-9.,0.,0.]]).transpose();
 
-    let mut res = qr(&a);
-    fix_zeroes(&mut res.r);
-    assert_eq!(format!("{:.2}", res.r), format!("{:.2}", r));
+    let res = qr(&a);
+    assert_eq!(format!("{:.2}", common::fix_zeroes(res.r)), format!("{:.2}", r));
 
     assert_eq!(res.h.len(), 1);
     assert_eq!(format!("{:.5}", res.h[0].get(2,2)), format!("{:.5}",0.2888888));
