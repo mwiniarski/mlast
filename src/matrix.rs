@@ -112,6 +112,20 @@ impl<T: Clone> Matrix<T> {
         }
     }
 
+    pub fn swap_rows(&mut self, row_1: usize, row_2: usize) {
+        if row_1 == row_2 {
+            return;
+        }
+        
+        for col in 0..self.width() {
+            unsafe {
+                let x = &mut self.rows[row_1][col] as *mut T;
+                let y = &mut self.rows[row_2][col] as *mut T;
+                std::mem::swap(&mut *x, &mut *y);
+            }
+        }
+    }
+
     pub fn get(&self, row_index: usize, col_index: usize) -> T {
         self.rows[row_index][col_index].clone()
     }

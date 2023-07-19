@@ -2,7 +2,8 @@ use crate::{matrix::*};
 
 pub struct LUResult {
     pub l: Matrix<f64>,
-    pub u: Matrix<f64>
+    pub u: Matrix<f64>,
+    pub p: Matrix<f64>
 }
 
 pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
@@ -13,8 +14,24 @@ pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
     // Setup U - same size as A, is our working matrix
     let mut u: Matrix<f64> = a.clone();
 
+    // Setup P - permutation matrix
+    let mut p: Matrix<f64> = Matrix::identity(a.height());
+
     // Each row is the basis for Gaussian Elimination
     for row in 0..u.height() {
+
+        // Find the row to pivot to the top - with highest element in the column
+        let mut biggest = (0, 0.);
+        for pivot_row in row..u.height() {
+            let val = &u.get(pivot_row, row);
+            if val.abs() > biggest.1 {
+                biggest = (pivot_row, val.abs());
+            }
+        }
+
+        // Swap two rows and save the permutation
+        u.swap_rows(row, biggest.0);
+        p.swap_rows(row, biggest.0);
 
         // Grab the first number in the row (which is on diagonal because all prior are 0)
         let pivot = u.get(row, row);
@@ -34,7 +51,7 @@ pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
         }
     }
 
-    LUResult { l: l, u: u }
+    LUResult { l: l, u: u, p: p }
 }
 
 pub fn lu_solve(lu: &LUResult, b: &Matrix<f64>) -> Matrix<f64> {
@@ -42,9 +59,10 @@ pub fn lu_solve(lu: &LUResult, b: &Matrix<f64>) -> Matrix<f64> {
         panic!("b must be in form of a column vector, b=[{},{}]", b.height(), b.height());
     }
 
-    // Ax = b , so LUx = b. If y = Ux, then Ly = b
-    // Step 1. Solve Ly = b for y using forward substitution
+    // PA = LU, Ax = b, so LUx = Pb. If y = Ux, then Ly = Pb
+    // Step 1. Solve Ly = Pb for y using forward substitution
     let mut y = Matrix::new_fill(b.height(), b.width(), 0.);
+    let b = &lu.p * b;
 
     for row in 0..y.height() {
         let mut new_y = b.get(row, 0);

@@ -5,17 +5,22 @@ mod common;
 fn lu_gauss_2x2() {
     let a = Matrix::from(
         [[2.,1.],
-         [8.,7.]]);
+         [8.,12.]]);
     let l = Matrix::from(
         [[1.,0.],
-         [4.,1.]]);
+         [0.25,1.]]);
     let u = Matrix::from(
-        [[2.,1.],
-         [0.,3.]]);
+        [[8.,12.],
+         [0.,-2.]]);
+    let p = Matrix::from(
+        [[0.,1.],
+         [1.,0.]]);
 
     let res = lu_gauss(&a);
     assert_eq!(format!("{:.2}", res.l), format!("{:.2}", l));
     assert_eq!(format!("{:.2}", res.u), format!("{:.2}", u));
+    assert_eq!(format!("{}", res.p), format!("{}", p));
+
 }
 
 #[test]
@@ -23,10 +28,12 @@ fn lu_gauss_row_vector() {
     let a = Matrix::from([[1.,2.,3.]]);
     let l = Matrix::from([[1.]]);
     let u = Matrix::from([[1.,2.,3.]]);
+    let p = Matrix::from([[1.]]);
 
     let res = lu_gauss(&a);
-    assert_eq!(format!("{:.2}", res.l), format!("{:.2}", l));
-    assert_eq!(format!("{:.2}", res.u), format!("{:.2}", u));
+    assert_eq!(format!("{}", res.l), format!("{}", l));
+    assert_eq!(format!("{}", res.u), format!("{}", u));
+    assert_eq!(format!("{}", res.p), format!("{}", p));
 }
 
 #[test]
@@ -39,7 +46,7 @@ fn lu_solve_test() {
         [[1.,0.,2.],
          [0.,-1.,-1.],
          [0.,0.,-1.]]);
-    let lu = LUResult { l: l, u: u};
+    let lu = LUResult { l: l, u: u, p: Matrix::<f64>::identity(3)};
     let b = Matrix::from([[-4.,-6.,-15.]]).transpose();
     let x = Matrix::from([[2.,1.,-3.]]).transpose();
 
@@ -63,6 +70,25 @@ fn inverse_with_lu() {
 }
 
 #[test]
-fn lu_gauss_pivot_is_0() {
-    //todo!()
+fn permutation_matrix_identity() {
+    let a = Matrix::from(
+        [[4.,1.,8.],
+         [1.,0.,2.],
+         [2.,0.5,3.]]);
+    let res = lu_gauss(&a);
+    assert_eq!(format!("{:.2}", res.p), format!("{:.2}", Matrix::<f64>::identity(a.height()))); 
+}
+
+#[test]
+fn permutation_matrix() {
+    let a = Matrix::from(
+        [[3.,1.,6.],
+         [2.,1.,3.],
+         [1.,1.,1.]]);
+    let p = Matrix::from(
+        [[1,0,0],
+         [0,0,1],
+         [0,1,0]]);
+    let res = lu_gauss(&a);
+    assert_eq!(format!("{}", res.p), format!("{}", p)); 
 }

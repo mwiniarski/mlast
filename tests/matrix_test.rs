@@ -225,8 +225,9 @@ fn set_matrix() {
 }
 
 #[test]
-fn test2() {
-    let m = Matrix::from([[-4,-3,-2,-1],[-1,0,1,2],[2,3,4,5],[6,7,8,9]]);
-    let r = Matrix::from([[1,0,0,0],[0,1,0,0],[2,3,4,5],[6,7,8,9]]);
-    println!("{}", r*m);
+fn swap_rows_test() {
+    let mut m = Matrix::from([[-4,-3,-2,-1],[-1,0,1,2],[2,3,4,5]]);
+    let n: Matrix<i32> = Matrix::from([[-4,-3,-2,-1],[2,3,4,5],[-1,0,1,2],]);
+    m.swap_rows(1,2);
+    assert_eq!(format!("{}", m), format!("{}", n));
 }
