@@ -1,4 +1,4 @@
-use crate::{matrix::*};
+use crate::matrix::*;
 
 pub struct LUResult {
     pub l: Matrix<f64>,
@@ -9,7 +9,7 @@ pub struct LUResult {
 pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
 
     // Setup L - sqare of size of height of A
-    let mut l: Matrix<f64> = Matrix::identity(a.height());
+    let mut l: Matrix<f64> = Matrix::new_fill(a.height(), a.height(), 0.);
 
     // Setup U - same size as A, is our working matrix
     let mut u: Matrix<f64> = a.clone();
@@ -18,7 +18,8 @@ pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
     let mut p: Matrix<f64> = Matrix::identity(a.height());
 
     // Each row is the basis for Gaussian Elimination
-    for row in 0..u.height() {
+    let iterations = u.width().min(u.height());
+    for row in 0..iterations {
 
         // Find the row to pivot to the top - with highest element in the column
         let mut biggest = (0, 0.);
@@ -29,16 +30,22 @@ pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
             }
         }
 
+        // If there are only "0s" in column, skip it
+        if biggest.1 <= f64::EPSILON {
+            continue;
+        }
+
         // Swap two rows and save the permutation
         u.swap_rows(row, biggest.0);
         p.swap_rows(row, biggest.0);
+        l.swap_rows(row, biggest.0);
 
         // Grab the first number in the row (which is on diagonal because all prior are 0)
         let pivot = u.get(row, row);
 
         for row_index in (row + 1)..u.height() {
 
-            // Compute quotient between pivot and evey number in the column below it
+            // Compute quotient between pivot and every number in the column below it
             let quotient = u.get(row_index, row) / pivot;
 
             // Save it to L in the same position as in U
@@ -51,7 +58,7 @@ pub fn lu_gauss(a: &Matrix<f64>) -> LUResult {
         }
     }
 
-    LUResult { l: l, u: u, p: p }
+    LUResult { l: Matrix::identity(l.height()) + l, u: u, p: p }
 }
 
 pub fn lu_solve(lu: &LUResult, b: &Matrix<f64>) -> Matrix<f64> {

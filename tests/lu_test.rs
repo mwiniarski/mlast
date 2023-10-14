@@ -20,7 +20,6 @@ fn lu_gauss_2x2() {
     assert_eq!(format!("{:.2}", res.l), format!("{:.2}", l));
     assert_eq!(format!("{:.2}", res.u), format!("{:.2}", u));
     assert_eq!(format!("{}", res.p), format!("{}", p));
-
 }
 
 #[test]
@@ -91,4 +90,16 @@ fn permutation_matrix() {
          [0,1,0]]);
     let res = lu_gauss(&a);
     assert_eq!(format!("{}", res.p), format!("{}", p)); 
+}
+
+#[test]
+fn tall_matrix() {
+    let a = Matrix::from(
+        [[1.,2.,3.],
+         [2.,4.,6.],
+         [2.,6.,8.],
+         [2.,8.,10.]]);
+
+    let res = lu_gauss(&a);
+    assert_eq!(format!("{:.2}\n", res.p * a), format!("{:.2}\n", res.l * res.u));
 }

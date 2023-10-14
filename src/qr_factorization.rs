@@ -1,4 +1,4 @@
-use crate::{matrix::*};
+use crate::matrix::*;
 
 pub struct QRResult<T> {
     pub r: Matrix<T>,
